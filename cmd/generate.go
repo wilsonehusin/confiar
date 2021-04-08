@@ -18,26 +18,36 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/wilsonehusin/confiar/internal"
 )
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
-	Use:   "generate",
+	Use:   "generate HOST_FQDN",
 	Short: "Generate new TLS certificate",
 	Long: `confiar generate -- create new TLS certificate
 
-Files will be created in working directory. No operation will be done if the
-files cert.pem and key.pem already exist in current directory.
+Files will be created in working directory as cert.pem and key.pem, if any of
+those files already exist, they will be overwritten.
 
 Specifications:
   - has itself as certificate authority (CA)
 	- is valid starting 1 hour ago until 30 days from now
 	- uses ECDSA P-521 (FIPS 186-3) aka. secp521r1
 `,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("generate called")
+	Args: cobra.ExactArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if !internal.ValidFQDN(args[0]) {
+			fmt.Fprintf(os.Stderr, "Error: \"%v\" is not a valid fully qualified domain name (FQDN)\n", args[0])
+			os.Exit(1)
+		}
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return internal.NewTLSSelfAuthority("gostd", args[0])
 	},
 }
 

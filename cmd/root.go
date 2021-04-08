@@ -35,8 +35,8 @@ var json bool
 var rootCmd = &cobra.Command{
 	Use:   "confiar",
 	Short: "confiar -- self-signed TLS certificates made easy",
-	Long: `Confiar lets you generate and distribute your self-signed
-certificates easily. The goal is to make any application to run as if valid
+	Long: `Confiar lets you easily generate and distribute your self-signed
+certificates. The goal is to make any application to run as if valid
 certificates are in place between hosts.
 
  !!! YOU SHOULD CONSIDER USING A REAL CERTIFICATE BEFORE ANYTHING ELSE !!!
@@ -79,7 +79,7 @@ func prepareLogger() {
 
 	if !json {
 		// turn on pretty logging
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
 	}
 }
 
