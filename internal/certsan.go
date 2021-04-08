@@ -22,7 +22,7 @@ import (
 
 // courtesy of https://www.socketloop.com/tutorials/golang-use-regular-expression-to-validate-domain-name
 // but mostly a hack until https://github.com/golang/go/issues/31671
-var fqdnRegExp = regexp.MustCompile(`^(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})|([a-zA-Z0-9][a-zA-Z0-9-_]{1,61}[a-zA-Z0-9]))\.([a-zA-Z]{2,6}|[a-zA-Z0-9-]{2,30}\.[a-zA-Z]{2,3})$`)
+var fqdnRegExp = regexp.MustCompile(`^((([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})|([a-zA-Z0-9][a-zA-Z0-9-_]{1,61}[a-zA-Z0-9]))\.)*([a-zA-Z]{2,6}|[a-zA-Z0-9-]{2,30}\.[a-zA-Z]{2,3})$`)
 
 func ValidFQDN(fqdn string) bool {
 	return fqdnRegExp.MatchString(fqdn)
