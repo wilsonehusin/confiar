@@ -47,7 +47,7 @@ Specifications:
 		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return internal.NewTLSSelfAuthority("gostd", args[0])
+		return internal.NewTLSSelfAuthority("gostd", []string{args[0]}, []string{})
 	},
 }
 

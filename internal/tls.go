@@ -1,10 +1,19 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/wilsonehusin/confiar/internal/cryptographer"
 )
 
-func NewTLSSelfAuthority(cryptographerBackend string, fqdn string) error {
-	gostd := cryptographer.GoStd{}
-	return gostd.NewTLSSelfAuthority(fqdn)
+var cryptoBackend cryptographer.Cryptographer
+
+func NewTLSSelfAuthority(backendType string, names []string, ips []string) error {
+	switch backendType {
+	case "gostd":
+		cryptoBackend = &cryptographer.GoStd{}
+	default:
+		return fmt.Errorf("unknown cryptographer backend type: %s", backendType)
+	}
+	return cryptoBackend.NewTLSSelfAuthority(names, ips)
 }

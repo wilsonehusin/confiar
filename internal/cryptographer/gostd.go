@@ -32,12 +32,19 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type GoStd struct{}
+type GoStd struct {
+	priv     *ecdsa.PrivateKey
+	derBytes []byte
+}
 
 // inspired by: https://golang.org/src/crypto/tls/generate_cert.go
-func (*GoStd) NewTLSSelfAuthority(fqdn string) error {
-	log.Info().Str("FQDN", fqdn).Send()
+func (g *GoStd) NewTLSSelfAuthority(names []string, ips []string) error {
+	log.Info().Strs("names", names).Strs("ips", ips).Send()
 	priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to generate private key")
+	}
+	g.priv = priv
 	keyUsage := x509.KeyUsageDigitalSignature
 
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
@@ -70,20 +77,21 @@ func (*GoStd) NewTLSSelfAuthority(fqdn string) error {
 		IsCA:                  true,
 	}
 	// TODO: relax this and support multi DNS / IP combo
-	template.DNSNames = append(template.DNSNames, fqdn)
+	template.DNSNames = append(template.DNSNames, names...)
 	template.KeyUsage |= x509.KeyUsageCertSign
 
-	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
+	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &g.priv.PublicKey, g.priv)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to generate certificate")
 	}
+	g.derBytes = derBytes
 
 	var writeWaiter sync.WaitGroup
 	writeWaiter.Add(2)
 
 	go func() {
 		defer writeWaiter.Done()
-		if err := writeCertFile(derBytes); err != nil {
+		if err := g.writeCertFile(); err != nil {
 			log.Fatal().Err(err).Str("filename", certFileName).Msg("writing file")
 		}
 		log.Info().Str("filename", certFileName).Msg("wrote file")
@@ -91,7 +99,7 @@ func (*GoStd) NewTLSSelfAuthority(fqdn string) error {
 
 	go func() {
 		defer writeWaiter.Done()
-		if err := writeKeyFile(priv); err != nil {
+		if err := g.writeKeyFile(); err != nil {
 			log.Fatal().Err(err).Str("filename", keyFileName).Msg("writing file")
 		}
 		log.Info().Str("filename", keyFileName).Msg("wrote file")
@@ -108,12 +116,12 @@ func (*GoStd) NewTLSSelfAuthority(fqdn string) error {
 	return nil
 }
 
-func writeCertFile(derBytes []byte) error {
+func (g *GoStd) writeCertFile() error {
 	certFile, err := os.Create(certFileName)
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
 	}
-	if err := pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes}); err != nil {
+	if err := pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: g.derBytes}); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
 	if err := certFile.Close(); err != nil {
@@ -122,12 +130,12 @@ func writeCertFile(derBytes []byte) error {
 	return nil
 }
 
-func writeKeyFile(priv *ecdsa.PrivateKey) error {
+func (g *GoStd) writeKeyFile() error {
 	keyFile, err := os.OpenFile(keyFileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
 	}
-	privBytes, err := x509.MarshalPKCS8PrivateKey(priv)
+	privBytes, err := x509.MarshalPKCS8PrivateKey(g.priv)
 	if err != nil {
 		return fmt.Errorf("failed to marshal private key: %w", err)
 	}
