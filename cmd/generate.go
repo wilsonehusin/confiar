@@ -19,11 +19,18 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/wilsonehusin/confiar/internal"
 )
+
+var nameList string
+var ipList string
+
+var names []string
+var ips []string
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
@@ -39,18 +46,39 @@ Specifications:
 	- is valid starting 1 hour ago until 30 days from now
 	- uses ECDSA P-521 (FIPS 186-3) aka. secp521r1
 `,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.NoArgs,
 	PreRun: func(cmd *cobra.Command, args []string) {
-		if !internal.ValidFQDN(args[0]) {
-			fmt.Fprintf(os.Stderr, "Error: \"%v\" is not a valid fully qualified domain name (FQDN)\n", args[0])
+		if nameList != "" {
+			names = strings.Split(nameList, ",")
+			for _, name := range names {
+				if !internal.ValidFQDN(name) {
+					fmt.Fprintf(os.Stderr, "Error: \"%v\" is not a valid fully qualified domain name (FQDN)\n", name)
+					os.Exit(1)
+				}
+			}
+		}
+		if ipList != "" {
+			ips = strings.Split(ipList, ",")
+			for _, ip := range ips {
+				if !internal.ValidIPAddr(ip) {
+					fmt.Fprintf(os.Stderr, "Error: \"%v\" is not a valid IP address\n", ip)
+					os.Exit(1)
+				}
+			}
+		}
+		if nameList == "" && ipList == "" {
+			// both nameList and ipList are empty string
+			fmt.Fprintf(os.Stderr, "Error: --fqdn and --ip cannot both be blank\n")
 			os.Exit(1)
 		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return internal.NewTLSSelfAuthority("gostd", []string{args[0]}, []string{})
+		return internal.NewTLSSelfAuthority("gostd", names, ips)
 	},
 }
 
 func init() {
+	generateCmd.Flags().StringVar(&nameList, "fqdn", "", "domain name(s) for certificate (comma separated)")
+	generateCmd.Flags().StringVar(&ipList, "ip", "", "IP address(es) for certificate (comma separated)")
 	rootCmd.AddCommand(generateCmd)
 }

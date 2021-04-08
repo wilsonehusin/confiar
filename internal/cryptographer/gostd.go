@@ -25,6 +25,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"math/big"
+	"net"
 	"os"
 	"sync"
 	"time"
@@ -76,9 +77,12 @@ func (g *GoStd) NewTLSSelfAuthority(names []string, ips []string) error {
 		BasicConstraintsValid: true,
 		IsCA:                  true,
 	}
-	// TODO: relax this and support multi DNS / IP combo
-	template.DNSNames = append(template.DNSNames, names...)
 	template.KeyUsage |= x509.KeyUsageCertSign
+
+	template.DNSNames = append(template.DNSNames, names...)
+	for _, ip := range ips {
+		template.IPAddresses = append(template.IPAddresses, net.ParseIP(ip))
+	}
 
 	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &g.priv.PublicKey, g.priv)
 	if err != nil {

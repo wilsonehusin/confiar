@@ -27,3 +27,9 @@ var fqdnRegExp = regexp.MustCompile(`^(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|([
 func ValidFQDN(fqdn string) bool {
 	return fqdnRegExp.MatchString(fqdn)
 }
+
+var ipv4RegExp = regexp.MustCompile(`^(\d{1,3}\.){3}\d{1,3}$`)
+
+func ValidIPAddr(ipaddr string) bool {
+	return ipv4RegExp.MatchString(ipaddr)
+}
