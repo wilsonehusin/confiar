@@ -2,8 +2,9 @@ GOROOT?=$(shell go env GOROOT)
 GIT_TAG?=$(shell git describe --always --dirty --tags)
 GIT_SHA?=$(shell git rev-parse --verify HEAD)
 CONTAINER_REGISTRY?=ghcr.io/wilsonehusin
-GOX_FLAGS?=-osarch="darwin/amd64 linux/amd64 linux/arm darwin/arm64 windows/amd64"
+GOX_FLAGS?=-osarch="linux/amd64 linux/arm linux/arm64 darwin/amd64 darwin/arm64"
 OUT_DIR?=_output
+CGO_ENABLED?=0
 
 GOTARGET=github.com/wilsonehusin/confiar
 GOVERSION=$(shell go env GOVERSION)
@@ -38,11 +39,11 @@ testcontainer: testbuild
 
 .PHONY: build
 build:
-	CGO_ENABLED=0 go build -o $(OUT_DIR)/ $(BUILD_FLAGS) .
+	CGO_ENABLED=$(CGO_ENABLED) go build -o $(OUT_DIR)/ $(BUILD_FLAGS) .
 
 .PHONY: multibuild
 multibuild:
-	gox -output="$(OUT_DIR)/{{.Dir}}_{{.OS}}_{{.Arch}}" $(GOX_FLAGS) $(BUILD_FLAGS)
+	CGO_ENABLED=$(CGO_ENABLED) gox -output="$(OUT_DIR)/{{.Dir}}_{{.OS}}_{{.Arch}}" $(GOX_FLAGS) $(BUILD_FLAGS)
 
 .PHONY: container
 container: build
