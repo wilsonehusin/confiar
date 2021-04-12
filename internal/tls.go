@@ -36,11 +36,16 @@ func NewTLSSelfAuthority(backendType string, names []string, ips []string) error
 	return cryptoBackend.NewTLSSelfAuthority(names, ips)
 }
 
-func InstallTLS(certSrc string, targetType string) error {
+func InstallTLS(certSrc string, targetType string, extraNames []string, extraIPs []string) error {
 	switch targetType {
 	case "stdout":
 		installTarget = &target.Stdout{
 			CertPath: certSrc,
+		}
+	case "docker":
+		installTarget = &target.Docker{
+			CertPath:   certSrc,
+			ExtraHosts: append(extraNames, extraIPs...),
 		}
 	default:
 		return fmt.Errorf("unknown installation target: %s", targetType)

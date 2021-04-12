@@ -102,7 +102,7 @@ var names []string
 var ips []string
 
 // TODO: return error and let each subcommand deal with the error themselves
-func requireNameAndIP() {
+func validateNameAndIP(required bool) {
 	if nameList != "" {
 		names = strings.Split(nameList, ",")
 		for _, name := range names {
@@ -121,7 +121,7 @@ func requireNameAndIP() {
 			}
 		}
 	}
-	if nameList == "" && ipList == "" {
+	if required && nameList == "" && ipList == "" {
 		// both nameList and ipList are empty string
 		fmt.Fprintf(os.Stderr, "Error: --fqdn and --ip cannot both be blank\n")
 		os.Exit(1)

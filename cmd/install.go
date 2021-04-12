@@ -28,19 +28,25 @@ var installTarget string
 var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Installs certificates in the defined target(s)",
-	Long:  `confiar install -- let your computer trust your certificate`,
+	Long: `confiar install -- let your computer trust your certificate
+
+For targets requiring specific hostnames to be mapped to each certificate,
+confiar will automatically parse the information from the given certificate.
+
+You can pass additional --fqdn or --ip for hostnames which were not included
+in the certificate.`,
 	PreRun: func(*cobra.Command, []string) {
-		// TODO: find out if requireNameAndIP() is necessary
+		validateNameAndIP(false)
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return internal.InstallTLS(certSrc, installTarget)
+		return internal.InstallTLS(certSrc, installTarget, names, ips)
 	},
 }
 
 func init() {
 	installCmd.Flags().StringVarP(&installTarget, "target", "t", "stdout", "installation target")
 	installCmd.Flags().StringVarP(&certSrc, "from", "f", "./cert.pem", "where to find the certificate")
-	installCmd.Flags().StringVar(&nameList, "fqdn", "", "domain name(s) for certificate (comma separated)")
-	installCmd.Flags().StringVar(&ipList, "ip", "", "IP address(es) for certificate (comma separated)")
+	installCmd.Flags().StringVar(&nameList, "fqdn", "", "additional domain name(s) for certificate (comma separated)")
+	installCmd.Flags().StringVar(&ipList, "ip", "", "additional IP address(es) for certificate (comma separated)")
 	rootCmd.AddCommand(installCmd)
 }

@@ -38,7 +38,7 @@ Specifications:
 `,
 	Args: cobra.NoArgs,
 	PreRun: func(cmd *cobra.Command, args []string) {
-		requireNameAndIP()
+		validateNameAndIP(true)
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return internal.NewTLSSelfAuthority("gostd", names, ips)
