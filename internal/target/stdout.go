@@ -14,34 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package target
 
 import (
 	"fmt"
-
-	"github.com/spf13/cobra"
-
-	"github.com/wilsonehusin/confiar/internal"
+	"os"
 )
 
-// versionCmd represents the version command
-var versionCmd = &cobra.Command{
-	Use:     "version",
-	Aliases: []string{"buildinfo"},
-	Short:   "Build versions",
-	Long:    `versions related to this build`,
-	Run: func(*cobra.Command, []string) {
-		versions := *internal.BuildInfo()
-		fmt.Printf("%v: %v\n", "Version", versions["Version"])
-		for k, v := range versions {
-			if k == "Version" {
-				continue
-			}
-			fmt.Printf("%v: %v\n", k, v)
-		}
-	},
+type Stdout struct {
+	CertPath string
 }
 
-func init() {
-	rootCmd.AddCommand(versionCmd)
+func (s *Stdout) Install() error {
+	certData, err := os.ReadFile(s.CertPath)
+	if err != nil {
+		return err
+	}
+	fmt.Print(string(certData))
+	return nil
 }

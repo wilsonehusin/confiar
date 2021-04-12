@@ -17,20 +17,10 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"os"
-	"strings"
-
 	"github.com/spf13/cobra"
 
 	"github.com/wilsonehusin/confiar/internal"
 )
-
-var nameList string
-var ipList string
-
-var names []string
-var ips []string
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
@@ -48,29 +38,7 @@ Specifications:
 `,
 	Args: cobra.NoArgs,
 	PreRun: func(cmd *cobra.Command, args []string) {
-		if nameList != "" {
-			names = strings.Split(nameList, ",")
-			for _, name := range names {
-				if !internal.ValidFQDN(name) {
-					fmt.Fprintf(os.Stderr, "Error: \"%v\" is not a valid fully qualified domain name (FQDN)\n", name)
-					os.Exit(1)
-				}
-			}
-		}
-		if ipList != "" {
-			ips = strings.Split(ipList, ",")
-			for _, ip := range ips {
-				if !internal.ValidIPAddr(ip) {
-					fmt.Fprintf(os.Stderr, "Error: \"%v\" is not a valid IP address\n", ip)
-					os.Exit(1)
-				}
-			}
-		}
-		if nameList == "" && ipList == "" {
-			// both nameList and ipList are empty string
-			fmt.Fprintf(os.Stderr, "Error: --fqdn and --ip cannot both be blank\n")
-			os.Exit(1)
-		}
+		requireNameAndIP()
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return internal.NewTLSSelfAuthority("gostd", names, ips)

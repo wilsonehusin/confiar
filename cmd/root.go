@@ -21,11 +21,14 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+
+	"github.com/wilsonehusin/confiar/internal"
 )
 
 var debug bool
@@ -34,8 +37,10 @@ var json bool
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "confiar",
-	Short: "confiar -- self-signed TLS certificates made easy",
-	Long: `Confiar lets you easily generate and distribute your self-signed
+	Short: "self-signed TLS certificates made easy",
+	Long: `confiar -- self-signed TLS certificates made easy
+
+Confiar lets you easily generate and distribute your self-signed
 certificates. The goal is to make any application to run as if valid
 certificates are in place between hosts.
 
@@ -86,4 +91,39 @@ func prepareLogger() {
 func init() {
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "toggle debug logs")
 	rootCmd.PersistentFlags().BoolVar(&json, "json", false, "print logs as json")
+}
+
+// not used in this file, but shared usage between different subcommands
+
+var nameList string
+var ipList string
+
+var names []string
+var ips []string
+
+// TODO: return error and let each subcommand deal with the error themselves
+func requireNameAndIP() {
+	if nameList != "" {
+		names = strings.Split(nameList, ",")
+		for _, name := range names {
+			if !internal.ValidFQDN(name) {
+				fmt.Fprintf(os.Stderr, "Error: \"%v\" is not a valid fully qualified domain name (FQDN)\n", name)
+				os.Exit(1)
+			}
+		}
+	}
+	if ipList != "" {
+		ips = strings.Split(ipList, ",")
+		for _, ip := range ips {
+			if !internal.ValidIPAddr(ip) {
+				fmt.Fprintf(os.Stderr, "Error: \"%v\" is not a valid IP address\n", ip)
+				os.Exit(1)
+			}
+		}
+	}
+	if nameList == "" && ipList == "" {
+		// both nameList and ipList are empty string
+		fmt.Fprintf(os.Stderr, "Error: --fqdn and --ip cannot both be blank\n")
+		os.Exit(1)
+	}
 }

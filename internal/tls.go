@@ -20,9 +20,11 @@ import (
 	"fmt"
 
 	"github.com/wilsonehusin/confiar/internal/cryptographer"
+	"github.com/wilsonehusin/confiar/internal/target"
 )
 
 var cryptoBackend cryptographer.Cryptographer
+var installTarget target.Target
 
 func NewTLSSelfAuthority(backendType string, names []string, ips []string) error {
 	switch backendType {
@@ -32,4 +34,19 @@ func NewTLSSelfAuthority(backendType string, names []string, ips []string) error
 		return fmt.Errorf("unknown cryptographer backend type: %s", backendType)
 	}
 	return cryptoBackend.NewTLSSelfAuthority(names, ips)
+}
+
+func InstallTLS(certSrc string, targetType string) error {
+	switch targetType {
+	case "stdout":
+		installTarget = &target.Stdout{
+			CertPath: certSrc,
+		}
+	default:
+		return fmt.Errorf("unknown installation target: %s", targetType)
+	}
+	if err := installTarget.Install(); err != nil {
+		return fmt.Errorf("install certificate: %w", err)
+	}
+	return nil
 }
