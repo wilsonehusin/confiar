@@ -32,7 +32,7 @@ Files will be created in working directory as cert.pem and key.pem, if any of
 those files already exist, they will be overwritten.
 
 Specifications:
-  - has itself as certificate authority (CA)
+ 	- has itself as certificate authority (CA)
 	- is valid starting 1 hour ago until 30 days from now
 	- uses ECDSA P-521 (FIPS 186-3) aka. secp521r1
 `,

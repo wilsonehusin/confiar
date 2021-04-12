@@ -38,7 +38,7 @@ testcontainer: testbuild
 
 .PHONY: build
 build:
-	go build -o $(OUT_DIR)/ $(BUILD_FLAGS) .
+	CGO_ENABLED=0 go build -o $(OUT_DIR)/ $(BUILD_FLAGS) .
 
 .PHONY: multibuild
 multibuild:
