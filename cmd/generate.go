@@ -24,7 +24,7 @@ import (
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
-	Use:   "generate HOST_FQDN",
+	Use:   "generate",
 	Short: "Generate new TLS certificate",
 	Long: `confiar generate -- create new TLS certificate
 
