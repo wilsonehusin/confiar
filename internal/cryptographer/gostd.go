@@ -56,7 +56,7 @@ func (g *GoStd) NewTLSSelfAuthority(names []string, ips []string) error {
 
 	now := time.Now()
 	validFrom := now.Add(-1 * time.Hour) // prevent issues from cross-machine time gap
-	validUntil := now.Add(30 * 24 * time.Hour)
+	validUntil := now.Add(365 * 24 * time.Hour)
 
 	log.Info().Time("validFrom", validFrom).Time("validUntil", validUntil).Msg("certificate valid lifetime")
 
