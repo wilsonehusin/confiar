@@ -33,7 +33,7 @@ those files already exist, they will be overwritten.
 
 Specifications:
  	- has itself as certificate authority (CA)
-	- is valid starting 1 hour ago until 30 days from now
+	- is valid starting 1 hour ago until 365 days from now
 	- uses ECDSA P-521 (FIPS 186-3) aka. secp521r1
 `,
 	Args: cobra.NoArgs,
