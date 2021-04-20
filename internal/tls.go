@@ -26,14 +26,14 @@ import (
 var cryptoBackend cryptographer.Cryptographer
 var installTarget target.Target
 
-func NewTLSSelfAuthority(backendType string, names []string, ips []string) error {
+func NewTLSSelfAuthority(backendType string, names []string, ips []string, outDir string) error {
 	switch backendType {
 	case "gostd":
 		cryptoBackend = &cryptographer.GoStd{}
 	default:
 		return fmt.Errorf("unknown cryptographer backend type: %s", backendType)
 	}
-	return cryptoBackend.NewTLSSelfAuthority(names, ips)
+	return cryptoBackend.NewTLSSelfAuthority(names, ips, outDir)
 }
 
 func InstallTLS(certSrc string, targetType string, extraNames []string, extraIPs []string) error {

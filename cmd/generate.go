@@ -22,6 +22,8 @@ import (
 	"github.com/wilsonehusin/confiar/internal"
 )
 
+var outDir string
+
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:   "generate",
@@ -41,11 +43,12 @@ Specifications:
 		validateNameAndIP(true)
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return internal.NewTLSSelfAuthority("gostd", names, ips)
+		return internal.NewTLSSelfAuthority("gostd", names, ips, outDir)
 	},
 }
 
 func init() {
+	generateCmd.Flags().StringVar(&outDir, "out-dir", ".", "directory where certificate will be written to")
 	generateCmd.Flags().StringVar(&nameList, "fqdn", "", "domain name(s) for certificate (comma separated)")
 	generateCmd.Flags().StringVar(&ipList, "ip", "", "IP address(es) for certificate (comma separated)")
 	rootCmd.AddCommand(generateCmd)

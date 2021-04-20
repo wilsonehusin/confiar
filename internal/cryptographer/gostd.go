@@ -27,6 +27,7 @@ import (
 	"math/big"
 	"net"
 	"os"
+	"path"
 	"sync"
 	"time"
 
@@ -36,11 +37,13 @@ import (
 type GoStd struct {
 	priv     *ecdsa.PrivateKey
 	derBytes []byte
+	outDir   string
 }
 
 // inspired by: https://golang.org/src/crypto/tls/generate_cert.go
-func (g *GoStd) NewTLSSelfAuthority(names []string, ips []string) error {
-	log.Info().Strs("names", names).Strs("ips", ips).Send()
+func (g *GoStd) NewTLSSelfAuthority(names []string, ips []string, outDir string) error {
+	log.Info().Strs("names", names).Strs("ips", ips).Str("outDir", outDir).Send()
+	g.outDir = outDir
 	priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to generate private key")
@@ -121,7 +124,7 @@ func (g *GoStd) NewTLSSelfAuthority(names []string, ips []string) error {
 }
 
 func (g *GoStd) writeCertFile() error {
-	certFile, err := os.Create(certFileName)
+	certFile, err := os.Create(path.Join(g.outDir, certFileName))
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
 	}
@@ -135,7 +138,7 @@ func (g *GoStd) writeCertFile() error {
 }
 
 func (g *GoStd) writeKeyFile() error {
-	keyFile, err := os.OpenFile(keyFileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	keyFile, err := os.OpenFile(path.Join(g.outDir, keyFileName), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
 	}
