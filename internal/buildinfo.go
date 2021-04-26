@@ -16,7 +16,7 @@ limitations under the License.
 
 package internal
 
-var Version = "v0.1.0"
+var Version = "v0.2.0"
 var GitSHA = "000000"
 var Go = "420.69"
 
