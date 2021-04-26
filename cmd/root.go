@@ -95,6 +95,7 @@ func init() {
 
 // not used in this file, but shared usage between different subcommands
 
+var certSrc string
 var nameList string
 var ipList string
 
