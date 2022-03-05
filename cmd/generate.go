@@ -39,10 +39,10 @@ Specifications:
 	- uses ECDSA P-521 (FIPS 186-3) aka. secp521r1
 `,
 	Args: cobra.NoArgs,
-	PreRun: func(cmd *cobra.Command, args []string) {
-		validateNameAndIP(true)
-	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := validateNameAndIP(true); err != nil {
+			return err
+		}
 		return internal.NewTLSSelfAuthority("gostd", names, ips, outDir)
 	},
 }
