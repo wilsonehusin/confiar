@@ -114,7 +114,8 @@ func (g *GoStd) NewTLSSelfAuthority(names []string, ips []string, outDir string)
 
 	writeWaiter.Wait()
 
-	for _, filename := range []string{certFileName, keyFileName} {
+	for _, relFilename := range []string{certFileName, keyFileName} {
+		filename := path.Join(outDir, relFilename)
 		if _, err := os.Stat(filename); err != nil {
 			log.Fatal().Err(err).Str("filename", filename).Msg("filestat error")
 		}
