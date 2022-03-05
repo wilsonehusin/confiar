@@ -35,10 +35,10 @@ confiar will automatically parse the information from the given certificate.
 
 You can pass additional --fqdn or --ip for hostnames which were not included
 in the certificate.`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return validateNameAndIP(true)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := validateNameAndIP(false); err != nil {
-			return err
-		}
 		return internal.InstallTLS(certSrc, installTarget, names, ips)
 	},
 }
