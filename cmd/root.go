@@ -102,14 +102,12 @@ var ipList string
 var names []string
 var ips []string
 
-// TODO: return error and let each subcommand deal with the error themselves
-func validateNameAndIP(required bool) {
+func validateNameAndIP(required bool) error {
 	if nameList != "" {
 		names = strings.Split(nameList, ",")
 		for _, name := range names {
 			if !internal.ValidFQDN(name) {
-				fmt.Fprintf(os.Stderr, "Error: \"%v\" is not a valid fully qualified domain name (FQDN)\n", name)
-				os.Exit(1)
+				return fmt.Errorf("\"%v\" is not a valid fully qualified domain name (FQDN)", name)
 			}
 		}
 	}
@@ -117,14 +115,14 @@ func validateNameAndIP(required bool) {
 		ips = strings.Split(ipList, ",")
 		for _, ip := range ips {
 			if !internal.ValidIPAddr(ip) {
-				fmt.Fprintf(os.Stderr, "Error: \"%v\" is not a valid IP address\n", ip)
-				os.Exit(1)
+				return fmt.Errorf("\"%v\" is not a valid IP address", ip)
 			}
 		}
 	}
 	if required && nameList == "" && ipList == "" {
 		// both nameList and ipList are empty string
-		fmt.Fprintf(os.Stderr, "Error: --fqdn and --ip cannot both be blank\n")
-		os.Exit(1)
+		return fmt.Errorf("--fqdn and --ip cannot both be blank")
 	}
+
+	return nil
 }

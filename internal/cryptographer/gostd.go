@@ -44,6 +44,12 @@ type GoStd struct {
 func (g *GoStd) NewTLSSelfAuthority(names []string, ips []string, outDir string) error {
 	log.Info().Strs("names", names).Strs("ips", ips).Str("outDir", outDir).Send()
 	g.outDir = outDir
+	if outDir != "" {
+		if err := os.MkdirAll(outDir, os.ModePerm); err != nil {
+			log.Fatal().Err(err).Msg("failed to create outDir")
+		}
+	}
+
 	priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to generate private key")
@@ -114,7 +120,8 @@ func (g *GoStd) NewTLSSelfAuthority(names []string, ips []string, outDir string)
 
 	writeWaiter.Wait()
 
-	for _, filename := range []string{certFileName, keyFileName} {
+	for _, relFilename := range []string{certFileName, keyFileName} {
+		filename := path.Join(outDir, relFilename)
 		if _, err := os.Stat(filename); err != nil {
 			log.Fatal().Err(err).Str("filename", filename).Msg("filestat error")
 		}
