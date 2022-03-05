@@ -1,2 +1,4 @@
 *.pem
 _output
+
+dist/
